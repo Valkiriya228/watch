@@ -12,19 +12,7 @@ class MainActivity : AppCompatActivity() {
     var flag: Boolean = false
     lateinit var sPref: SharedPreferences
 
-    private val backgroundThread = Thread {
-        while (flag) {
-            try {
-                Thread.sleep(1000)
-                textSecondsElapsed.post {
-                    textSecondsElapsed.setText("Seconds elapsed: " + secondsElapsed++)
-                }
-            } catch (e: InterruptedException) {
-                println("Thread has been interrupted")
-            }
 
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,8 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         sPref = getPreferences(MODE_PRIVATE);
         secondsElapsed = sPref.getInt("secondsElapsed", 0)
-        flag = true
-        backgroundThread.start()
+
 
         Log.d(TAG, "MainActivity: onCreate()")
     }
@@ -41,12 +28,27 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        flag = true
-        Log.d(TAG, "MainActivity: onResume")
+        val backgroundThread = Thread {
+            while (flag) {
+                try {
+                    Thread.sleep(1000)
+                    textSecondsElapsed.post {
+                        textSecondsElapsed.setText("Seconds elapsed: " + secondsElapsed++)
+                    }
+                } catch (e: Exception) {
+                    println("exception")
+                }
+
+            }
+        }
         if (!flag) {
             flag = true
             backgroundThread.start()
+        } else {
+            backgroundThread.start()
         }
+        Log.d(TAG, "MainActivity: onResume")
+
     }
 
     override fun onPause() {
