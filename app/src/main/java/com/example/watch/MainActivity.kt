@@ -9,27 +9,14 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
     var secondsElapsed: Int = 0
     var TAG: String = "States"
-    var flag: Boolean = false
+    var flag1: Boolean = true
+    var flag2: Boolean = true
     lateinit var sPref: SharedPreferences
 
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        sPref = getPreferences(MODE_PRIVATE);
-        secondsElapsed = sPref.getInt("secondsElapsed", 0)
-
-
-        Log.d(TAG, "MainActivity: onCreate()")
-    }
-
-
-    override fun onResume() {
-        super.onResume()
-        val backgroundThread = Thread {
-            while (flag) {
+    val backgroundThread = Thread {
+        while (flag1) {
+            if (flag2) {
                 try {
                     Thread.sleep(1000)
                     textSecondsElapsed.post {
@@ -38,22 +25,35 @@ class MainActivity : AppCompatActivity() {
                 } catch (e: Exception) {
                     println("exception")
                 }
-
             }
+
         }
-        if (!flag) {
-            flag = true
-            backgroundThread.start()
-        } else {
-            backgroundThread.start()
-        }
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        sPref = getPreferences(MODE_PRIVATE);
+        secondsElapsed = sPref.getInt("secondsElapsed", 0)
+        backgroundThread.start()
+
+        Log.d(TAG, "MainActivity: onCreate()")
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        flag1 = true
+        flag2 = true
         Log.d(TAG, "MainActivity: onResume")
 
     }
 
     override fun onPause() {
         super.onPause()
-        flag = false
+        flag2 = false
         Log.d(TAG, "MainActivity: onPause")
     }
 
@@ -65,6 +65,12 @@ class MainActivity : AppCompatActivity() {
         editor.apply()
 
         Log.d(TAG, "MainActivity: onStop")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        flag1 = false
+        Log.d(TAG, "MainActivity: onPause")
     }
 
 }
